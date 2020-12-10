@@ -1,0 +1,39 @@
+---
+- hosts: webserver
+  vars:
+    - port_no: 8085
+    - doc_root: "/var/www/adi/"
+
+  tasks:
+  - name: Install httpd
+    package: 
+      name: httpd
+      state: present
+
+  - name: Create document root
+    file:
+      name: "{{ doc_root }}"
+      state: directory
+
+  - name: Copy web page
+    copy:
+      dest: "{{ doc_root }}/index.html"
+      content: "This is a webpage !!"
+
+  - name: Copy the conf file
+    template:
+      dest: "/etc/httpd/conf.d/adi.conf"
+      src: adi.conf
+    notify:
+    - Restart httpd
+
+  - name: Start httpd
+    service:
+      name: httpd
+      state: started
+
+  handlers: 
+  - name: Restart httpd
+    service:
+      name: httpd
+      state: restarted
